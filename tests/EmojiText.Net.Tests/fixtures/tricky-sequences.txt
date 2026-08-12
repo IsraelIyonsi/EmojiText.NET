@@ -1,0 +1,77 @@
+NAME couple_with_heart_zwj_is_one_emoji_mid_sentence
+TEXT They are 👨‍❤️‍👨 forever.
+MATCH 9 1F468 200D 2764 FE0F 200D 1F468
+
+NAME subdivision_flag_england_tag_sequence
+TEXT Support from 🏴󠁧󠁢󠁥󠁮󠁧󠁿 confirmed.
+MATCH 13 1F3F4 E0067 E0062 E0065 E006E E0067 E007F
+
+NAME subdivision_flag_scotland_tag_sequence
+TEXT Support from 🏴󠁧󠁢󠁳󠁣󠁴󠁿 confirmed.
+MATCH 13 1F3F4 E0067 E0062 E0073 E0063 E0074 E007F
+
+NAME keycap_hash_sequence
+TEXT Press #️⃣ to continue.
+MATCH 6 0023 FE0F 20E3
+
+NAME keycap_digit_sequence
+TEXT Choose option 1️⃣ now.
+MATCH 14 0031 FE0F 20E3
+
+NAME two_adjacent_country_flags_are_two_matches
+TEXT 🇳🇬🇬🇧 trade route
+MATCH 0 1F1F3 1F1EC
+MATCH 4 1F1EC 1F1E7
+
+NAME skin_tone_modifier_sequence_is_one_emoji
+TEXT Nice 👍🏽 work.
+MATCH 5 1F44D 1F3FD
+
+NAME family_zwj_sequence_is_one_emoji_not_three
+TEXT Meet the 👨‍👦 family.
+MATCH 9 1F468 200D 1F466
+
+NAME emoji_at_string_start
+TEXT 😀 leads the message
+MATCH 0 1F600
+
+NAME emoji_at_string_end
+TEXT trailing emoji 😀
+MATCH 15 1F600
+
+NAME three_consecutive_astral_emoji_no_separator
+TEXT 😀😁😂
+MATCH 0 1F600
+MATCH 2 1F601
+MATCH 4 1F602
+
+NAME emoji_adjacent_to_punctuation_no_space
+TEXT Great!😀Really!
+MATCH 6 1F600
+
+NAME plain_ascii_text_has_no_emoji
+TEXT hello world, no emoji here 123 !@#$%
+
+NAME cjk_text_has_no_emoji
+TEXT 你好世界
+
+NAME unqualified_text_presentation_symbol_not_matched
+TEXT plain sun symbol ☀ without selector
+
+NAME isolated_regional_indicator_without_pair_not_matched
+TEXT stray letter 🇳 alone
+
+NAME unrecognized_regional_indicator_pair_not_matched
+TEXT not a real flag 🇦🇦 here
+
+NAME bare_keycap_base_without_combining_marks_not_matched
+TEXT room number 3 only
+
+NAME lone_high_surrogate_does_not_throw_or_match
+TEXT broken \u{D800} surrogate
+
+NAME mixed_multiple_emoji_and_text_indices
+TEXT Rate: 👍🏽 price: 5️⃣ stars: ⭐
+MATCH 6 1F44D 1F3FD
+MATCH 18 0035 FE0F 20E3
+MATCH 29 2B50

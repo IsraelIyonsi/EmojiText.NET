@@ -1,0 +1,2 @@
+* text=auto
+tests/EmojiText.Net.Tests/fixtures/** -text
