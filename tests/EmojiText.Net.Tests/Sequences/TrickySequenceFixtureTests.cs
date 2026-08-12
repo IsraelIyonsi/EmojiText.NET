@@ -6,8 +6,9 @@ namespace EmojiText.Net.Tests.Sequences;
 /// <summary>
 /// Hand-authored hotspot fixtures for the cases that are easy to get wrong:
 /// ZWJ families and couples, subdivision flags, keycaps, adjacent country
-/// flags, skin-tone modifiers, string-boundary emoji, and text that must
-/// never be mistaken for emoji.
+/// flags, odd-length regional-indicator runs, skin-tone modifiers (including
+/// a bare modifier matching standalone), string-boundary emoji, and text
+/// that must never be mistaken for emoji.
 /// </summary>
 public class TrickySequenceFixtureTests
 {
@@ -40,6 +41,6 @@ public class TrickySequenceFixtureTests
     [Fact]
     public void Fixture_has_the_expected_pinned_case_count()
     {
-        Assert.Equal(20, TrickySequenceCase.ReadAll(FixturePath).Count());
+        Assert.Equal(23, TrickySequenceCase.ReadAll(FixturePath).Count());
     }
 }

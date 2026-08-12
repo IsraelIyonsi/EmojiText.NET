@@ -61,11 +61,14 @@ public static class Emoji
     /// </summary>
     /// <param name="text">The text to strip, or <see langword="null"/>.</param>
     /// <param name="collapseWhitespace">
-    /// When <see langword="true"/>, every run of whitespace left in the
-    /// result is collapsed to a single space and the result is trimmed of
-    /// leading and trailing whitespace. When <see langword="false"/> (the
-    /// default), whitespace that surrounded a removed emoji is left as-is,
-    /// which commonly leaves doubled spaces behind.
+    /// When <see langword="true"/>, whitespace that touched a removed emoji
+    /// (immediately before it, immediately after it, or both, once adjacent
+    /// runs merge) is collapsed to a single space, or removed entirely when
+    /// that leaves it at the very start or end of the result. Whitespace
+    /// elsewhere in <paramref name="text"/> that never bordered an emoji is
+    /// left exactly as it was. When <see langword="false"/> (the default),
+    /// no whitespace is touched at all, which commonly leaves doubled spaces
+    /// where an emoji used to be.
     /// </param>
     /// <returns>
     /// <paramref name="text"/> with all emoji removed. Returns an empty
@@ -73,8 +76,26 @@ public static class Emoji
     /// </returns>
     public static string Strip(string? text, bool collapseWhitespace = false)
     {
-        var stripped = Replace(text, string.Empty);
-        return collapseWhitespace ? CollapseWhitespace(stripped) : stripped;
+        if (string.IsNullOrEmpty(text))
+        {
+            return string.Empty;
+        }
+
+        if (!collapseWhitespace)
+        {
+            return Replace(text, string.Empty);
+        }
+
+        var removalSites = new List<int>();
+        var removedSoFar = 0;
+        var stripped = ReplaceEach(text, match =>
+        {
+            removalSites.Add(match.Index - removedSoFar);
+            removedSoFar += match.Length;
+            return string.Empty;
+        });
+
+        return CollapseWhitespaceAroundRemovals(stripped, removalSites);
     }
 
     /// <summary>
@@ -129,40 +150,54 @@ public static class Emoji
         return builder.ToString();
     }
 
-    private static string CollapseWhitespace(string value)
+    /// <summary>
+    /// Collapses only the whitespace runs in <paramref name="value"/> that
+    /// touch a recorded emoji removal site. A touched run becomes a single
+    /// space, or is removed entirely if that would leave it at the very
+    /// start or end of the result. Whitespace runs that never bordered a
+    /// removal are copied through unchanged.
+    /// </summary>
+    private static string CollapseWhitespaceAroundRemovals(string value, IReadOnlyList<int> removalSites)
     {
+        if (removalSites.Count == 0)
+        {
+            return value;
+        }
+
         var builder = new StringBuilder(value.Length);
-        var previousWasWhitespace = false;
-        foreach (var ch in value)
+        var siteIndex = 0;
+        var position = 0;
+        while (position < value.Length)
         {
-            if (char.IsWhiteSpace(ch))
+            var runStart = position;
+            var isWhitespaceRun = char.IsWhiteSpace(value[position]);
+            while (position < value.Length && char.IsWhiteSpace(value[position]) == isWhitespaceRun)
             {
-                if (!previousWasWhitespace)
-                {
-                    builder.Append(WhitespaceCollapseChar);
-                }
-
-                previousWasWhitespace = true;
+                position++;
             }
-            else
+
+            if (!isWhitespaceRun)
             {
-                builder.Append(ch);
-                previousWasWhitespace = false;
+                builder.Append(value, runStart, position - runStart);
+                continue;
+            }
+
+            while (siteIndex < removalSites.Count && removalSites[siteIndex] < runStart)
+            {
+                siteIndex++;
+            }
+
+            var touchesRemoval = siteIndex < removalSites.Count && removalSites[siteIndex] <= position;
+            if (!touchesRemoval)
+            {
+                builder.Append(value, runStart, position - runStart);
+            }
+            else if (runStart != 0 && position != value.Length)
+            {
+                builder.Append(WhitespaceCollapseChar);
             }
         }
 
-        var start = 0;
-        var end = builder.Length;
-        while (start < end && builder[start] == WhitespaceCollapseChar)
-        {
-            start++;
-        }
-
-        while (end > start && builder[end - 1] == WhitespaceCollapseChar)
-        {
-            end--;
-        }
-
-        return builder.ToString(start, end - start);
+        return builder.ToString();
     }
 }

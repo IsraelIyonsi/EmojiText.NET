@@ -75,3 +75,15 @@ TEXT Rate: 👍🏽 price: 5️⃣ stars: ⭐
 MATCH 6 1F44D 1F3FD
 MATCH 18 0035 FE0F 20E3
 MATCH 29 2B50
+
+NAME odd_length_regional_indicator_run_pairs_strictly_left_to_right_not_by_validity
+TEXT flags 🇦🇦🇨 here
+
+NAME valid_flag_then_unpaired_trailing_regional_indicator_in_odd_run
+TEXT 🇳🇬🇦 trade route
+MATCH 0 1F1F3 1F1EC
+
+NAME skin_tone_modifier_after_a_non_modifiable_base_matches_as_two_separate_emoji
+TEXT reaction 😀🏽 twice
+MATCH 9 1F600
+MATCH 11 1F3FD

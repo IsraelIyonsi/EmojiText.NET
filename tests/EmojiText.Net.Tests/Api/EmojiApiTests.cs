@@ -112,6 +112,22 @@ public class EmojiApiTests
     }
 
     [Fact]
+    public void Strip_with_collapseWhitespace_leaves_whitespace_untouched_when_it_never_bordered_an_emoji()
+    {
+        var text = "  Hello   " + GrinningFace + "   world  ";
+
+        Assert.Equal("  Hello world  ", Emoji.Strip(text, collapseWhitespace: true));
+    }
+
+    [Fact]
+    public void Strip_with_collapseWhitespace_does_not_collapse_whitespace_in_a_run_with_no_emoji_at_all()
+    {
+        var text = "no   emoji   here";
+
+        Assert.Equal(text, Emoji.Strip(text, collapseWhitespace: true));
+    }
+
+    [Fact]
     public void Replace_substitutes_fixed_string_for_every_match()
     {
         var text = "Rate " + ManSkinToneTone3ThumbsUp + " today " + GrinningFace;

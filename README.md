@@ -59,7 +59,7 @@ A single static class, `Emoji`:
 | `HasEmoji(string?)` | Whether the text contains any RGI emoji |
 | `Count(string?)` | Number of emoji, each multi-codepoint sequence counted once |
 | `EnumerateMatches(string?)` | Lazily yields `EmojiMatch { Value, Index, Length }` for every match, left to right, indices and lengths in UTF-16 chars |
-| `Strip(string?, collapseWhitespace: false)` | Removes all emoji; optionally collapses and trims surrounding whitespace |
+| `Strip(string?, collapseWhitespace: false)` | Removes all emoji; optionally collapses whitespace that touched a removed emoji, trimming it away entirely at the start or end of the result. Whitespace elsewhere in the string is never touched |
 | `Replace(string?, string?)` | Replaces every emoji with a fixed string |
 | `ReplaceEach(string?, Func<EmojiMatch, string>)` | Replaces every emoji with a string computed from that match |
 | `UnicodeEmojiVersion` | The pinned Unicode emoji specification version the embedded data was built from |
@@ -70,10 +70,12 @@ All methods accept `null` and treat it the same as an empty string; no exception
 
 Matching is scoped precisely to the `RGI_Emoji` property as defined by [UTS #51](https://unicode.org/reports/tr51/): the union of the `Basic_Emoji`, `Emoji_Keycap_Sequence`, `RGI_Emoji_Flag_Sequence`, `RGI_Emoji_Tag_Sequence`, and `RGI_Emoji_Modifier_Sequence` properties from `emoji-sequences.txt`, plus `RGI_Emoji_ZWJ_Sequence` from `emoji-zwj-sequences.txt`. Both files are published by the Unicode Consortium and this library embeds their fully-qualified sequences directly (Unicode emoji version 16.0, exposed as `Emoji.UnicodeEmojiVersion`).
 
-Two consequences worth knowing:
+Four consequences worth knowing:
 
 - **"Unqualified" text-presentation symbols are excluded by design.** A bare `☺` (U+263A, no variation selector) is "unqualified" in Unicode's own test data and is not matched; `☺️` (U+263A U+FE0F) is fully-qualified and is matched. This is not an oversight, it is the RGI scope as Unicode defines it, and matches what modern keyboards and platforms actually emit.
-- **Regional-indicator letters only match in the specific pairs Unicode recognizes as real or historical flags.** A lone regional indicator, or a pair that spells no assigned flag, is left alone rather than guessed at.
+- **Regional-indicator letters only match in the specific pairs Unicode recognizes as real or historical flags.** A lone regional indicator, or a pair that spells no assigned flag, is left alone rather than guessed at. Pairing itself always follows [UAX #29](https://unicode.org/reports/tr29/)'s strict left-to-right grouping (an odd one out never borrows its neighbor's partner), so a run like three regional indicators where only the first and second, or only the second and third, would spell a real flag is matched exactly the way a grapheme-cluster-aware renderer displays it, not by scanning ahead for whichever pairing happens to be assigned.
+- **Skin-tone and hair-style modifiers (U+1F3FB-U+1F3FF, U+1F9B0-U+1F9B3) are themselves RGI `Basic_Emoji`,** so a bare modifier with no base emoji in front of it still counts as one match. Applied after a base that supports it (e.g. 👍🏽), the pair is one match; applied after a base that Unicode does not list as modifiable (e.g. 😀🏽), it is reported as two separate matches, because that pairing simply is not an RGI sequence. This is the RGI table's word on it, not this library's guess, and it is a deliberate difference from grapheme-cluster segmentation, which would glue the two together as one cluster regardless of whether Unicode assigned that combination meaning.
+- **`Strip(text, collapseWhitespace: true)` only touches whitespace that bordered a removed emoji.** Two spaces left behind where an emoji used to sit collapse to one, and collapse away entirely if that leaves them at the very start or end of the result; whitespace anywhere else in the string, with no emoji ever near it, is left exactly as it was.
 
 ## Why this exists
 
